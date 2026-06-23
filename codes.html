@@ -720,6 +720,18 @@
                 </div>
             </div>
         </div>
+    <script>
+        // Check if the user went through the locker
+        // We set 'lockerOpened' in sessionStorage when they click the unlock button on index.html
+        // If it's not present, it means they navigated directly to codes.html, which isn't allowed
+        if (sessionStorage.getItem('lockerOpened') !== 'true') {
+            // Redirect them back to the index page to complete the offer
+            window.location.href = 'index.html#unlock';
+        } else {
+            // Optional: Clear the flag after successful access so they must verify again if they come back later
+            // sessionStorage.removeItem('lockerOpened');
+        }
+    </script>
     </div>
 
     <script>

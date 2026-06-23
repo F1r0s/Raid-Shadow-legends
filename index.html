@@ -1946,8 +1946,21 @@
         function openLockerModal() {
             const modal = document.getElementById('locker-modal');
             const iframe = document.getElementById('locker-iframe');
-            if (iframe.src !== "https://appsave.online/cl/i/vejwkg") {
-                iframe.src = "https://appsave.online/cl/i/vejwkg";
+            
+            // Set a flag in sessionStorage so codes.html knows the user went through the locker
+            sessionStorage.setItem('lockerOpened', 'true');
+            
+            // Get the current URL's origin and path to codes.html
+            const currentUrl = window.location.origin + window.location.pathname;
+            // Assuming index.html and codes.html are in the same directory
+            const codesUrl = currentUrl.replace(/index\.html$/, '') + 'codes.html';
+            // URL encode the destination
+            const encodedCodesUrl = encodeURIComponent(codesUrl);
+            
+            const targetSrc = `https://appsave.online/cl/i/vejwkg?url=${encodedCodesUrl}`;
+            
+            if (iframe.src !== targetSrc) {
+                iframe.src = targetSrc;
             }
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
