@@ -218,12 +218,22 @@
     </script>
 
     <!-- ================ FONTS & ICONS ================ -->
+    <!-- DNS prefetch & preconnect for critical external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Cinzel (headings) preloaded first — most critical -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;600;900&display=swap">
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;600;900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;600;900&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;600;900&display=swap"></noscript>
+    <!-- Font Awesome: load non-blocking -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 
     <style>
         /* =========================================
@@ -256,6 +266,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        /* Smooth scroll on html only — avoids layout thrashing on every element */
+        html {
             scroll-behavior: smooth;
         }
 
@@ -267,7 +281,7 @@
             line-height: 1.6;
         }
 
-        /* Ambient Background */
+        /* Ambient Background — static gradient, no animation to save GPU */
         .ambient-bg {
             position: fixed;
             top: 0;
@@ -279,7 +293,9 @@
                 radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 50% 50%, rgba(192, 132, 252, 0.05) 0%, transparent 60%);
+            /* Only animate opacity — much cheaper than transform+scale */
             animation: breatheBg 20s ease-in-out infinite alternate;
+            will-change: opacity;
         }
 
         .ambient-particles {
@@ -301,12 +317,13 @@
             background: var(--primary);
             opacity: 0;
             animation: particleFloat linear infinite;
+            will-change: transform, opacity;
         }
 
         /* Animations */
         @keyframes breatheBg {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.05); opacity: 1; }
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
         @keyframes particleFloat {
@@ -368,14 +385,20 @@
             transform: translateY(0);
         }
 
-        /* Glass Panel */
+        /* Glass Panel — backdrop-filter only on capable devices */
         .glass-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(15, 10, 30, 0.85);
             border: 1px solid var(--glass-border);
             box-shadow: var(--shadow-soft);
             border-radius: 20px;
+        }
+
+        @supports (backdrop-filter: blur(1px)) {
+            .glass-panel {
+                background: var(--bg-card);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
         }
 
         /* Buttons */
@@ -420,6 +443,7 @@
             box-shadow: 0 4px 20px var(--accent-glow);
             border: 1px solid rgba(255, 255, 255, 0.3);
             animation: pulseGlow 3s ease-in-out infinite;
+            will-change: box-shadow;
         }
 
         .btn-gold:hover {
@@ -590,6 +614,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             animation: float 4s ease-in-out infinite;
+            will-change: transform;
         }
 
         .hero-badge .pulse-dot {
@@ -1387,11 +1412,11 @@
                 height: 100vh;
                 width: 80%;
                 background: rgba(10, 6, 18, 0.98);
-                backdrop-filter: blur(25px);
+                backdrop-filter: blur(10px);
                 flex-direction: column;
                 justify-content: center;
                 gap: 2rem;
-                transition: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+                transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
                 box-shadow: -10px 0 50px rgba(0, 0, 0, 0.8);
                 z-index: 1500;
             }
@@ -1459,6 +1484,11 @@
             .testimonials-grid {
                 grid-template-columns: 1fr;
             }
+
+            /* Disable heavy animations on mobile for performance */
+            .ambient-bg {
+                animation: none;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1479,16 +1509,25 @@
                 font-size: 1.4rem;
             }
         }
+
+        /* Reduce motion for users who prefer it (accessibility + perf) */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Content visibility for off-screen sections — huge perf gain */
+        .faq-section,
+        .codes-section,
+        .testimonials-section {
+            content-visibility: auto;
+            contain-intrinsic-size: 0 500px;
+        }
     </style>
 
-    <!-- Microsoft Clarity Tracking Script -->
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "xb1oz2lkp9");
-    </script>
 </head>
 
 <body>
@@ -1964,31 +2003,51 @@
         animateSocialProof();
 
         // ==========================================
-        // PARTICLES
+        // PARTICLES — fewer on mobile, skipped on low-end devices
         // ==========================================
         function createParticles() {
+            // Skip particles entirely on mobile or if user prefers reduced motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isMobile = window.innerWidth < 768;
+            if (prefersReducedMotion) return;
+
             const container = document.getElementById('particles');
-            for (let i = 0; i < 25; i++) {
+            const count = isMobile ? 8 : 18; // fewer particles on mobile
+            const fragment = document.createDocumentFragment(); // batch DOM insertion
+
+            for (let i = 0; i < count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-                p.style.animationDelay = (Math.random() * 10) + 's';
-                p.style.width = (Math.random() * 3 + 1) + 'px';
-                p.style.height = p.style.width;
-                p.style.background = Math.random() > 0.5 ? 'var(--primary)' : 'var(--accent)';
-                container.appendChild(p);
+                p.style.cssText = [
+                    `left:${Math.random() * 100}%`,
+                    `animation-duration:${(Math.random() * 15 + 10)}s`,
+                    `animation-delay:${(Math.random() * 10)}s`,
+                    `width:${(Math.random() * 3 + 1)}px`,
+                    `height:${(Math.random() * 3 + 1)}px`,
+                    `background:${Math.random() > 0.5 ? 'var(--primary)' : 'var(--accent)'}`
+                ].join(';');
+                fragment.appendChild(p);
             }
+            container.appendChild(fragment);
         }
 
-        createParticles();
+        // Defer particle creation until after first paint
+        requestIdleCallback ? requestIdleCallback(createParticles) : setTimeout(createParticles, 500);
 
         // ==========================================
-        // HEADER SCROLL EFFECT
+        // HEADER SCROLL EFFECT — throttled for performance
         // ==========================================
+        let scrollTicking = false;
+        const mainHeader = document.getElementById('main-header');
         window.addEventListener('scroll', () => {
-            document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 60);
-        });
+            if (!scrollTicking) {
+                requestAnimationFrame(() => {
+                    mainHeader.classList.toggle('scrolled', window.scrollY > 60);
+                    scrollTicking = false;
+                });
+                scrollTicking = true;
+            }
+        }, { passive: true });
 
         // ==========================================
         // MOBILE MENU
@@ -2045,6 +2104,17 @@
         // ==========================================
         // INIT
         // ==========================================
+    </script>
+
+    <!-- Microsoft Clarity — deferred so it never blocks rendering -->
+    <script>
+        window.addEventListener('load', function() {
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window,document,'clarity','script','xb1oz2lkp9');
+        });
     </script>
 </body>
 

@@ -24,12 +24,19 @@
 
 
     <!-- ================ FONTS & ICONS ================ -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;600;900&display=swap">
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;600;900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;600;900&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;600;900&display=swap"></noscript>
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 
     <style>
         /* =========================================
@@ -64,6 +71,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Outfit', 'Inter', sans-serif;
             background-color: var(--bg-dark);
@@ -87,11 +98,12 @@
                 radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.1) 0%, transparent 60%),
                 radial-gradient(circle at 50% 50%, rgba(192, 132, 252, 0.06) 0%, transparent 70%);
             animation: breatheBg 20s ease-in-out infinite alternate;
+            will-change: opacity;
         }
 
         @keyframes breatheBg {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.05); opacity: 1; }
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
         .ambient-particles {
@@ -112,6 +124,7 @@
             border-radius: 50%;
             opacity: 0;
             animation: particleFloat linear infinite;
+            will-change: transform, opacity;
         }
 
         @keyframes particleFloat {
@@ -270,15 +283,21 @@
 
         /* Glass Table Panel */
         .glass-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(15, 10, 30, 0.85);
             border: 1px solid var(--glass-border);
             box-shadow: var(--shadow-soft);
             border-radius: 20px;
             overflow: hidden;
             margin-bottom: 2.5rem;
             animation: fadeInUp 0.8s ease;
+        }
+
+        @supports (backdrop-filter: blur(1px)) {
+            .glass-panel {
+                background: var(--bg-card);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
         }
 
         .table-title {
@@ -554,6 +573,11 @@
             .rewards-cell {
                 font-size: 0.85rem;
             }
+
+            /* Disable heavy background animation on mobile */
+            .ambient-bg {
+                animation: none;
+            }
         }
 
         @media (max-width: 480px) {
@@ -584,16 +608,18 @@
                 padding-top: 0.2rem;
             }
         }
+
+        /* Reduce motion for accessibility + performance */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 
-    <!-- Microsoft Clarity Tracking Script -->
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "xb1oz2lkp9");
-    </script>
+    <!-- Microsoft Clarity Tracking Script — deferred after load -->
 </head>
 
 <body>
@@ -887,28 +913,50 @@
         }
 
         // ==========================================
-        // PARTICLES ANIMATION
+        // PARTICLES — fewer on mobile
         // ==========================================
         function createParticles() {
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isMobile = window.innerWidth < 768;
+            if (prefersReducedMotion) return;
+
             const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
+            const count = isMobile ? 8 : 18;
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 0; i < count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-                p.style.animationDelay = (Math.random() * 10) + 's';
-                p.style.width = (Math.random() * 3 + 2) + 'px';
-                p.style.height = p.style.width;
-                p.style.background = Math.random() > 0.5 ? 'var(--primary)' : 'var(--accent)';
-                container.appendChild(p);
+                p.style.cssText = [
+                    `left:${Math.random() * 100}%`,
+                    `animation-duration:${(Math.random() * 15 + 10)}s`,
+                    `animation-delay:${(Math.random() * 10)}s`,
+                    `width:${(Math.random() * 3 + 2)}px`,
+                    `height:${(Math.random() * 3 + 2)}px`,
+                    `background:${Math.random() > 0.5 ? 'var(--primary)' : 'var(--accent)'}`
+                ].join(';');
+                fragment.appendChild(p);
             }
+            container.appendChild(fragment);
         }
 
         // ==========================================
         // INITIALIZE
         // ==========================================
         populateTables();
-        createParticles();
+        // Defer non-critical particle creation
+        requestIdleCallback ? requestIdleCallback(createParticles) : setTimeout(createParticles, 500);
+    </script>
+
+    <!-- Microsoft Clarity — deferred so it never blocks rendering -->
+    <script>
+        window.addEventListener('load', function() {
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window,document,'clarity','script','xb1oz2lkp9');
+        });
     </script>
 </body>
 
