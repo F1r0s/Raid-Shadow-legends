@@ -26,10 +26,19 @@
     <!-- ================ FONTS & ICONS ================ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
+    <link rel="preload"
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;600;900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;600;900&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
 
     <style>
         /* =========================================
@@ -72,6 +81,11 @@
             line-height: 1.6;
             min-height: 100vh;
             padding-bottom: 5rem;
+        }
+
+        .container > * {
+            content-visibility: auto;
+            contain-intrinsic-size: 1px 600px;
         }
 
         /* Ambient Background */
@@ -500,6 +514,14 @@
 
         /* Responsive Layout */
         @media (max-width: 768px) {
+            .ambient-bg {
+                animation: none;
+            }
+
+            .ambient-particles {
+                display: none;
+            }
+
             .container {
                 padding: 1rem 1rem;
             }
@@ -553,6 +575,18 @@
 
             .rewards-cell {
                 font-size: 0.85rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .ambient-bg,
+            .ambient-particles {
+                display: none !important;
             }
         }
 
@@ -891,7 +925,11 @@
         // ==========================================
         function createParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+            if (!container || reducedMotion || isMobileViewport) return;
+            const particleCount = window.innerWidth < 1200 ? 14 : 30;
+            for (let i = 0; i < particleCount; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
                 p.style.left = Math.random() * 100 + '%';

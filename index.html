@@ -220,10 +220,19 @@
     <!-- ================ FONTS & ICONS ================ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
+    <link rel="preload"
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;600;900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;800&family=Outfit:wght@300;600;900&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
 
     <style>
         /* =========================================
@@ -256,8 +265,9 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            scroll-behavior: smooth;
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Outfit', 'Inter', sans-serif;
@@ -265,6 +275,11 @@
             color: var(--text-main);
             overflow-x: hidden;
             line-height: 1.6;
+        }
+
+        main section:not(.hero) {
+            content-visibility: auto;
+            contain-intrinsic-size: 1px 700px;
         }
 
         /* Ambient Background */
@@ -1368,6 +1383,14 @@
 
         /* ======================== RESPONSIVE ======================== */
         @media (max-width: 768px) {
+            .ambient-bg {
+                animation: none;
+            }
+
+            .ambient-particles {
+                display: none;
+            }
+
             .hero h1 {
                 font-size: 2.5rem;
             }
@@ -1422,6 +1445,27 @@
 
             .code-value {
                 width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .ambient-bg,
+            .ambient-particles {
+                display: none !important;
+            }
+
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
             }
 
             .proof-grid {
@@ -1938,6 +1982,10 @@
             document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
         }
 
+        const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+        const shouldRenderParticles = !isReducedMotion && !isMobileViewport;
+
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
@@ -1947,18 +1995,25 @@
         function animateSocialProof() {
             const liveEl = document.getElementById('live-users');
             const claimedEl = document.getElementById('codes-claimed');
+            if (!liveEl || !claimedEl) return;
 
-            setInterval(() => {
+            const liveInterval = setInterval(() => {
                 const delta = Math.floor(Math.random() * 20) - 8;
                 const current = parseInt(liveEl.textContent.replace(/,/g, ''));
                 const newVal = Math.max(1500, Math.min(4000, current + delta));
                 liveEl.textContent = newVal.toLocaleString();
             }, 3000);
 
-            setInterval(() => {
+            const claimedInterval = setInterval(() => {
                 const current = parseInt(claimedEl.textContent.replace(/,/g, ''));
                 claimedEl.textContent = (current + Math.floor(Math.random() * 5) + 1).toLocaleString();
             }, 5000);
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) return;
+                clearInterval(liveInterval);
+                clearInterval(claimedInterval);
+            }, { once: true });
         }
 
         animateSocialProof();
@@ -1968,7 +2023,9 @@
         // ==========================================
         function createParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 25; i++) {
+            if (!container || !shouldRenderParticles) return;
+            const particleCount = window.innerWidth < 1200 ? 12 : 25;
+            for (let i = 0; i < particleCount; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
                 p.style.left = Math.random() * 100 + '%';
@@ -1986,9 +2043,16 @@
         // ==========================================
         // HEADER SCROLL EFFECT
         // ==========================================
+        const mainHeader = document.getElementById('main-header');
+        let scrollingTick = false;
         window.addEventListener('scroll', () => {
-            document.getElementById('main-header').classList.toggle('scrolled', window.scrollY > 60);
-        });
+            if (scrollingTick || !mainHeader) return;
+            scrollingTick = true;
+            requestAnimationFrame(() => {
+                mainHeader.classList.toggle('scrolled', window.scrollY > 60);
+                scrollingTick = false;
+            });
+        }, { passive: true });
 
         // ==========================================
         // MOBILE MENU
@@ -2013,15 +2077,20 @@
         // ==========================================
         // SCROLL REVEAL
         // ==========================================
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.1 });
+        const revealEls = document.querySelectorAll('.reveal');
+        if (isReducedMotion || !('IntersectionObserver' in window)) {
+            revealEls.forEach(el => el.classList.add('active'));
+        } else {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            revealEls.forEach(el => observer.observe(el));
+        }
 
         // ==========================================
         // FAQ TOGGLE
