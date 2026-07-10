@@ -1890,53 +1890,248 @@
             </div>
         </section>
 
-        <!-- ===================== REWARDS PREVIEW ===================== -->
-        <section class="rewards-section" id="rewards">
+        <!-- ===================== REWARDS CAROUSEL (ImageWheel) ===================== -->
+        <section class="rewards-section" id="rewards" aria-labelledby="rewards-heading">
             <div class="section-header reveal">
-                <h2>What You'll <span class="text-purple">Unlock</span></h2>
-                <p>All rewards from today's active promo codes combined</p>
+                <h2 id="rewards-heading">What You'll <span class="text-purple">Unlock</span></h2>
+                <p>Drag or swipe to explore all rewards from today's active promo codes</p>
                 <div class="line"></div>
             </div>
 
-            <div class="rewards-grid reveal">
-                <div class="reward-card glass-panel">
-                    <span class="reward-icon">💎</span>
-                    <div class="reward-qty">3x</div>
-                    <h4>Sacred Shards</h4>
-                    <p>Guaranteed Legendary pull chances</p>
+            <!-- SEO: hidden list for crawlers -->
+            <ul style="position:absolute;left:-9999px;" aria-hidden="true">
+                <li>3x Sacred Shards &#8211; Guaranteed Legendary pull chances</li>
+                <li>5x Ancient Shards &#8211; Epic &amp; Legendary champion summons</li>
+                <li>2,000 Energy &#8211; Keep farming dungeons non-stop</li>
+                <li>1.5M Silver &#8211; Upgrade gear &amp; rank champions</li>
+                <li>500 Auto-Battle tickets &#8211; AFK grinding made effortless</li>
+                <li>1x Legendary Skill Tome &#8211; Skill up any Legendary champion</li>
+            </ul>
+
+            <div class="wheel-wrapper reveal" role="region" aria-label="Rewards carousel">
+                <button class="wheel-nav wheel-prev" id="wheel-prev" aria-label="Previous reward">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="wheel-nav wheel-next" id="wheel-next" aria-label="Next reward">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+
+                <div class="wheel-track" id="wheel-track" role="list">
+                    <article class="wcard" data-index="0" role="listitem" aria-label="Sacred Shards reward">
+                        <span class="wcard-icon" aria-hidden="true">💎</span>
+                        <div class="wcard-qty">3x</div>
+                        <h3 class="wcard-name">Sacred Shards</h3>
+                        <p class="wcard-desc">Guaranteed Legendary pull chances</p>
+                    </article>
+                    <article class="wcard" data-index="1" role="listitem" aria-label="Ancient Shards reward">
+                        <span class="wcard-icon" aria-hidden="true">🔮</span>
+                        <div class="wcard-qty">5x</div>
+                        <h3 class="wcard-name">Ancient Shards</h3>
+                        <p class="wcard-desc">Epic &amp; Legendary champion summons</p>
+                    </article>
+                    <article class="wcard" data-index="2" role="listitem" aria-label="Energy reward">
+                        <span class="wcard-icon" aria-hidden="true">&#9889;</span>
+                        <div class="wcard-qty">2,000</div>
+                        <h3 class="wcard-name">Energy</h3>
+                        <p class="wcard-desc">Keep farming dungeons non-stop</p>
+                    </article>
+                    <article class="wcard" data-index="3" role="listitem" aria-label="Silver reward">
+                        <span class="wcard-icon" aria-hidden="true">🪙</span>
+                        <div class="wcard-qty">1.5M</div>
+                        <h3 class="wcard-name">Silver</h3>
+                        <p class="wcard-desc">Upgrade gear &amp; rank champions</p>
+                    </article>
+                    <article class="wcard" data-index="4" role="listitem" aria-label="Auto-Battle reward">
+                        <span class="wcard-icon" aria-hidden="true">📜</span>
+                        <div class="wcard-qty">500</div>
+                        <h3 class="wcard-name">Auto-Battle</h3>
+                        <p class="wcard-desc">AFK grinding made effortless</p>
+                    </article>
+                    <article class="wcard" data-index="5" role="listitem" aria-label="Legendary Tome reward">
+                        <span class="wcard-icon" aria-hidden="true">🏆</span>
+                        <div class="wcard-qty">1x</div>
+                        <h3 class="wcard-name">Legendary Tome</h3>
+                        <p class="wcard-desc">Skill up any Legendary champion</p>
+                    </article>
                 </div>
-                <div class="reward-card glass-panel">
-                    <span class="reward-icon">🔮</span>
-                    <div class="reward-qty">5x</div>
-                    <h4>Ancient Shards</h4>
-                    <p>Epic & Legendary champion summons</p>
-                </div>
-                <div class="reward-card glass-panel">
-                    <span class="reward-icon">⚡</span>
-                    <div class="reward-qty">2,000</div>
-                    <h4>Energy</h4>
-                    <p>Keep farming dungeons non-stop</p>
-                </div>
-                <div class="reward-card glass-panel">
-                    <span class="reward-icon">🪙</span>
-                    <div class="reward-qty">1.5M</div>
-                    <h4>Silver</h4>
-                    <p>Upgrade gear & rank champions</p>
-                </div>
-                <div class="reward-card glass-panel">
-                    <span class="reward-icon">📜</span>
-                    <div class="reward-qty">500</div>
-                    <h4>Auto-Battle</h4>
-                    <p>AFK grinding made effortless</p>
-                </div>
-                <div class="reward-card glass-panel">
-                    <span class="reward-icon">ðŸ†</span>
-                    <div class="reward-qty">1x</div>
-                    <h4>Legendary Tome</h4>
-                    <p>Skill up any Legendary champion</p>
-                </div>
+
+                <div class="wheel-dots" id="wheel-dots" role="tablist" aria-label="Reward slides"></div>
+                <p class="wheel-hint" aria-hidden="true"><i class="fas fa-hand-pointer"></i> Drag or click arrows to explore</p>
             </div>
         </section>
+
+        <style>
+            .rewards-section { padding: 4rem 1rem; max-width: 1100px; margin: 0 auto; }
+            .wheel-wrapper {
+                position: relative; height: 420px;
+                display: flex; align-items: center; justify-content: center;
+                perspective: 1200px;
+                cursor: grab; user-select: none; -webkit-user-select: none;
+                touch-action: pan-y; overflow: visible;
+            }
+            .wheel-wrapper:active { cursor: grabbing; }
+            .wheel-track {
+                position: relative; width: 260px; height: 310px;
+                transform-style: preserve-3d;
+            }
+            .wcard {
+                position: absolute; inset: 0;
+                background: rgba(15,10,30,0.82);
+                border: 1px solid rgba(192,132,252,0.18);
+                border-radius: 24px; padding: 2.2rem 1.8rem;
+                text-align: center; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; gap: 0.6rem;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(192,132,252,0.08);
+                will-change: transform, opacity;
+                transition: transform 0.55s cubic-bezier(0.25,1,0.5,1), opacity 0.55s ease;
+                cursor: pointer;
+                backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            }
+            .wcard.is-active {
+                box-shadow: 0 30px 80px rgba(0,0,0,0.8),
+                            0 0 40px rgba(192,132,252,0.25),
+                            0 0 0 1.5px rgba(192,132,252,0.4);
+                border-color: rgba(192,132,252,0.4);
+                z-index: 10;
+            }
+            .wcard-icon {
+                font-size: 3rem; line-height: 1; display: block;
+                filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+                transition: transform 0.3s ease;
+            }
+            .wcard.is-active .wcard-icon { transform: scale(1.12); }
+            .wcard-qty {
+                font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 900;
+                color: var(--accent); line-height: 1;
+                text-shadow: 0 0 20px rgba(245,158,11,0.4);
+            }
+            .wcard-name {
+                font-family: 'Cinzel', serif; font-size: 1.05rem;
+                font-weight: 700; color: #fff; margin: 0;
+            }
+            .wcard-desc { font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+            .wheel-nav {
+                position: absolute; top: 50%; transform: translateY(-50%); z-index: 20;
+                width: 46px; height: 46px; border-radius: 50%;
+                background: rgba(15,10,30,0.85); border: 1px solid rgba(192,132,252,0.3);
+                color: var(--primary); font-size: 1rem; cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            }
+            .wheel-prev { left: 0; }
+            .wheel-next { right: 0; }
+            .wheel-nav:hover {
+                background: rgba(192,132,252,0.2); border-color: var(--primary);
+                box-shadow: 0 0 20px rgba(192,132,252,0.3);
+                transform: translateY(-50%) scale(1.1);
+            }
+            .wheel-dots {
+                position: absolute; bottom: -2.5rem; left: 50%; transform: translateX(-50%);
+                display: flex; gap: 8px; align-items: center;
+            }
+            .wheel-dot {
+                width: 7px; height: 7px; border-radius: 50%;
+                background: rgba(192,132,252,0.25); border: none; cursor: pointer; padding: 0;
+                transition: all 0.3s ease;
+            }
+            .wheel-dot.active {
+                background: var(--primary); width: 22px; border-radius: 4px;
+                box-shadow: 0 0 10px rgba(192,132,252,0.5);
+            }
+            .wheel-hint {
+                position: absolute; bottom: -4.5rem; left: 50%; transform: translateX(-50%);
+                font-size: 0.75rem; color: rgba(161,161,181,0.5); white-space: nowrap;
+                display: flex; align-items: center; gap: 6px; pointer-events: none;
+            }
+            @media (max-width: 600px) {
+                .wheel-wrapper { height: 380px; perspective: 900px; }
+                .wheel-track { width: 220px; height: 275px; }
+                .wcard { padding: 1.8rem 1.4rem; border-radius: 20px; }
+                .wcard-icon { font-size: 2.5rem; }
+                .wcard-qty { font-size: 1.3rem; }
+                .wcard-name { font-size: 0.95rem; }
+                .wheel-nav { width: 38px; height: 38px; font-size: 0.85rem; }
+            }
+            @media (prefers-reduced-motion: reduce) { .wcard { transition: none !important; } }
+        </style>
+
+        <script>
+        (function() {
+            var CARDS = document.querySelectorAll('.wcard');
+            var track = document.getElementById('wheel-track');
+            var dotsEl = document.getElementById('wheel-dots');
+            var N = CARDS.length;
+            var active = 0;
+            var POS = [
+                { x:   0, y:  0, z:   0, ry:   0, scale: 1,    opacity: 1,    visible: true  },
+                { x: 170, y: 10, z:-130, ry:  28, scale: 0.82,  opacity: 0.72, visible: true  },
+                { x:-170, y: 10, z:-130, ry: -28, scale: 0.82,  opacity: 0.72, visible: true  },
+                { x: 290, y: 30, z:-260, ry:  42, scale: 0.63,  opacity: 0.4,  visible: true  },
+                { x:-290, y: 30, z:-260, ry: -42, scale: 0.63,  opacity: 0.4,  visible: true  },
+                { x:   0, y:  0, z:-400, ry:   0, scale: 0.45,  opacity: 0,    visible: false }
+            ];
+            function getPosForOffset(offset) {
+                var abs = Math.min(Math.abs(offset), POS.length - 1);
+                var p = Object.assign({}, POS[abs]);
+                if (offset < 0) { p.x = -p.x; p.ry = -p.ry; }
+                return p;
+            }
+            function layout(animated) {
+                CARDS.forEach(function(card, i) {
+                    var offset = i - active;
+                    if (offset > N / 2)  offset -= N;
+                    if (offset < -N / 2) offset += N;
+                    var p = getPosForOffset(offset);
+                    var zIdx = POS.length - Math.min(Math.abs(offset), POS.length - 1);
+                    card.style.transition = animated
+                        ? 'transform 0.55s cubic-bezier(0.25,1,0.5,1), opacity 0.55s ease'
+                        : 'none';
+                    card.style.transform = 'translate3d(' + p.x + 'px,' + p.y + 'px,' + p.z + 'px) rotateY(' + p.ry + 'deg) scale(' + p.scale + ')';
+                    card.style.opacity   = p.opacity;
+                    card.style.zIndex    = zIdx;
+                    card.style.pointerEvents = p.visible ? 'auto' : 'none';
+                    card.classList.toggle('is-active', offset === 0);
+                    card.setAttribute('aria-hidden', offset !== 0 ? 'true' : 'false');
+                });
+                document.querySelectorAll('.wheel-dot').forEach(function(d, i) {
+                    d.classList.toggle('active', i === active);
+                    d.setAttribute('aria-selected', i === active ? 'true' : 'false');
+                });
+            }
+            function go(dir) { active = (active + dir + N) % N; layout(true); }
+            for (var i = 0; i < N; i++) {
+                (function(idx) {
+                    var d = document.createElement('button');
+                    d.className = 'wheel-dot';
+                    d.setAttribute('role', 'tab');
+                    d.setAttribute('aria-label', 'Go to reward ' + (idx + 1));
+                    d.addEventListener('click', function() { active = idx; layout(true); });
+                    dotsEl.appendChild(d);
+                })(i);
+            }
+            document.getElementById('wheel-prev').addEventListener('click', function() { go(-1); });
+            document.getElementById('wheel-next').addEventListener('click', function() { go(1); });
+            CARDS.forEach(function(card, i) {
+                card.addEventListener('click', function() { if (i !== active) { active = i; layout(true); } });
+            });
+            var dragStartX = 0, isDragging = false, hasDragged = false;
+            track.addEventListener('mousedown', function(e) { isDragging = true; hasDragged = false; dragStartX = e.clientX; e.preventDefault(); });
+            window.addEventListener('mousemove', function(e) { if (!isDragging) return; if (Math.abs(e.clientX - dragStartX) > 8) hasDragged = true; });
+            window.addEventListener('mouseup', function(e) { if (!isDragging) return; isDragging = false; var diff = e.clientX - dragStartX; if (hasDragged && Math.abs(diff) > 40) go(diff < 0 ? 1 : -1); });
+            var touchStartX = 0, touchStartY = 0;
+            track.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }, { passive: true });
+            track.addEventListener('touchend', function(e) { var dx = e.changedTouches[0].clientX - touchStartX; var dy = e.changedTouches[0].clientY - touchStartY; if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) go(dx < 0 ? 1 : -1); }, { passive: true });
+            document.addEventListener('keydown', function(e) { if (e.key === 'ArrowRight') go(1); if (e.key === 'ArrowLeft') go(-1); });
+            var autoPlay = setInterval(function() { go(1); }, 3800);
+            var wrapper = document.querySelector('.wheel-wrapper');
+            wrapper.addEventListener('mouseenter', function() { clearInterval(autoPlay); });
+            wrapper.addEventListener('touchstart', function() { clearInterval(autoPlay); }, { passive: true });
+            wrapper.addEventListener('mouseleave', function() { autoPlay = setInterval(function() { go(1); }, 3800); });
+            layout(false);
+        })();
+        </script>
+
 
         <!-- ===================== HOW IT WORKS ===================== -->
         <section class="how-section" id="how-it-works">
