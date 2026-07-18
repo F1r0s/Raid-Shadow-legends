@@ -2569,6 +2569,12 @@
             
             const targetSrc = `https://appsave.online/cl/i/vejwkg?url=${encodedCodesUrl}`;
             
+            // Redirect directly to the locker on mobile devices
+            if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                window.location.href = targetSrc;
+                return;
+            }
+            
             if (iframe.src !== targetSrc) {
                 iframe.src = targetSrc;
             }
