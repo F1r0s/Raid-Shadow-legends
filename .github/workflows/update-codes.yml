@@ -1,4 +1,4 @@
-name: Monthly Promo Codes Auto-Update
+name: Auto Update Promo Codes
 
 on:
   schedule:
@@ -26,7 +26,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install beautifulsoup4
+        pip install -r requirements.txt
 
     - name: Run Update Script
       run: python update_promo_codes.py
@@ -38,9 +38,10 @@ jobs:
         
         # Check if there are any changes in tracked files
         if ! git diff --quiet; then
-          git add index.html codes.html
-          git commit -m "chore: auto-update promo codes and month header"
+          git add -A
+          git commit -m "chore: auto-update promo codes"
           git push
         else
           echo "No changes to commit."
         fi
+

@@ -151,17 +151,23 @@ def main():
         
     # Month replacement helper
     def update_month_year(content):
-        months_pattern = r"\b(January|February|March|April|May|June|July|August|September|October|November|December)\b\s+(\d{4})"
+        months_pattern = r"\b(January|February|March|April|May|June|July|August|September|October|November|December)\b(\s+\d{1,2},)?\s+(\d{4})"
         def replace_match(m):
             orig_month = m.group(1)
+            has_day = m.group(2)
             if orig_month.isupper():
                 new_month = current_month_name.upper()
             elif orig_month.islower():
                 new_month = current_month_name.lower()
             else:
                 new_month = current_month_name.capitalize()
+            if has_day:
+                # Retain or update date with current day/month
+                day_str = has_day.strip().rstrip(",")
+                return f"{new_month} {day_str}, {current_year}"
             return f"{new_month} {current_year}"
         return re.sub(months_pattern, replace_match, content, flags=re.IGNORECASE)
+
 
     # Count replacement helper
     def update_count_in_text(content):
@@ -382,8 +388,36 @@ def main():
         content = re.sub(r"<lastmod>\d{4}-\d{2}-\d{2}</lastmod>", f"<lastmod>{current_date_str}</lastmod>", content)
         with open(sitemap, "w", encoding="utf-8") as f:
             f.write(content)
+
+    # 11. Update all other HTML pages in subdirectories (e.g. faq/index.html, how-to-redeem/index.html)
+    processed_paths = set()
+    for p in [root_index, root_codes, sub_index, sub_codes]:
+        if p and os.path.exists(p):
+            processed_paths.add(os.path.abspath(p))
+
+    for root_dir, _, files in os.walk(base_dir):
+        if ".git" in root_dir or ".github" in root_dir:
+            continue
+        for file in files:
+            if file.endswith(".html") and not file.startswith("googlecd"):
+                file_path = os.path.abspath(os.path.join(root_dir, file))
+                if file_path in processed_paths:
+                    continue
+                
+                rel_p = os.path.relpath(file_path, base_dir)
+                print(f"Updating additional HTML page: {rel_p}...")
+                with open(file_path, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+                
+                updated_html = update_month_year(html_content)
+                updated_html = update_count_in_text(updated_html)
+                
+                if updated_html != html_content:
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(updated_html)
             
     print("Database and HTML pages successfully updated!")
 
 if __name__ == "__main__":
     main()
+
